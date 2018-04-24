@@ -70,7 +70,11 @@ public:
 
         // scroll view
         gtk_scrolled_window_set_policy(scroll_view, GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+#if ((GTK_MAJOR_VERSION == 3 && GTK_MINOR_VERSION < 7) || (GTK_MAJOR_VERSION == 3 && GTK_MINOR_VERSION == 7 && GTK_MICRO_VERSION < 8))
         gtk_scrolled_window_add_with_viewport(scroll_view, GTK_WIDGET(web_view));
+#else
+        gtk_container_add(GTK_CONTAINER(scroll_view), GTK_WIDGET(web_view));
+#endif
 
         // signals
         g_signal_connect(window, "destroy", G_CALLBACK(destroy_callback), this);
