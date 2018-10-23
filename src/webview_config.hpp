@@ -46,6 +46,7 @@ public:
     uint16_t window_width = 640;
     uint16_t window_height = 480;
     bool console_to_stdout = false;
+    bool inspector_mode = false;
 
     webview_config(const webview_config&) = delete;
 
@@ -58,7 +59,8 @@ public:
     close_key(other.close_key),
     window_width(other.window_width),
     window_height(other.window_height),
-    console_to_stdout(other.console_to_stdout) { }
+    console_to_stdout(other.console_to_stdout),
+    inspector_mode(other.inspector_mode) { }
 
     webview_config& operator=(webview_config&& other) {
         url = std::move(other.url);
@@ -68,6 +70,7 @@ public:
         window_width = other.window_width;
         window_height = other.window_height;
         console_to_stdout = other.console_to_stdout;
+        inspector_mode = other.inspector_mode;
         return *this;
     }
 
@@ -90,6 +93,8 @@ public:
                 this->window_height = fi.as_uint16_positive_or_throw(name);
             } else if("consoleToStdout" == name) {
                 this->console_to_stdout = fi.as_bool_or_throw(name);
+            }  else if("inspectorMode" == name) {
+                this->inspector_mode = fi.as_bool_or_throw(name);
             } else {
                 throw support::exception(TRACEMSG("Unknown 'webview_config' field: [" + name + "]"));
             }
@@ -106,7 +111,8 @@ public:
             { "closeKey", close_key },
             { "windowHeight", window_height },
             { "windowWidth", window_width },
-            { "consoleToStdout", console_to_stdout }
+            { "consoleToStdout", console_to_stdout },
+            { "inspectorMode", inspector_mode}
         };
     }
 };
