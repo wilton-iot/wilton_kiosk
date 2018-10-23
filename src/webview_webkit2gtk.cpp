@@ -37,6 +37,8 @@
 
 #include "webview_config.hpp"
 
+#include <iostream>
+
 namespace wilton {
 namespace kiosk {
 
@@ -44,6 +46,7 @@ class webview::impl : public staticlib::pimpl::object::impl {
     webview_config conf;
     GtkWidget* window;
     WebKitWebView* web_view;
+    WebKitWebInspector *inspector;
     bool fullscreen_state;
 
 public:
@@ -51,6 +54,7 @@ public:
     conf(std::move(wconf)),
     window(gtk_window_new(GTK_WINDOW_TOPLEVEL)),
     web_view(WEBKIT_WEB_VIEW(webkit_web_view_new())),
+    inspector(nullptr),
     fullscreen_state(conf.fullscreen) {
         // defaults
         if (0 == conf.fullscreen_key) {
@@ -82,12 +86,19 @@ public:
         } else {
             gtk_window_resize(GTK_WINDOW(window), conf.window_width, conf.window_height);
         }
+        if (conf.inspector_mode) {
+            webkit_settings_set_enable_developer_extras(webkit_web_view_get_settings(web_view), TRUE);
+            inspector = webkit_web_view_get_inspector(WEBKIT_WEB_VIEW(web_view));
+        }
     }
 
     void run(webview&) {
         gtk_widget_show_all(window);
         webkit_web_view_load_uri(web_view, conf.url.c_str());
         gtk_widget_grab_focus(GTK_WIDGET(web_view));
+        if (conf.inspector_mode) {
+            webkit_web_inspector_show(WEBKIT_WEB_INSPECTOR(inspector));
+        }
         gtk_main();
     }
 
