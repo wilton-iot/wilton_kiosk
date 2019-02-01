@@ -39,7 +39,7 @@ task:
     echo "Updating modules to master"
     bash ./resources/ci/master-modules.sh
     echo "Replacing repo to test PR"
-    rm -r modules/wilton_ghc
-    cp -a /tmp/cirrus-ci-build modules/wilton_ghc
+    rm -r modules/wilton_kiosk
+    cp -a /tmp/cirrus-ci-build modules/wilton_kiosk
     pushd jni && git rev-parse HEAD && popd
     bash ./resources/ci/cirrus.sh
