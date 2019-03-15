@@ -27,7 +27,6 @@
 #include "wilton/wiltoncall.h"
 #include "wilton/wilton_kiosk.h"
 
-#include "wilton/support/handle_registry.hpp"
 #include "wilton/support/buffer.hpp"
 #include "wilton/support/registrar.hpp"
 

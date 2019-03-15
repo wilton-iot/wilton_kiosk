@@ -27,7 +27,6 @@
 
 #include "wilton/support/alloc.hpp"
 #include "wilton/support/buffer.hpp"
-#include "wilton/support/handle_registry.hpp"
 #include "wilton/support/logging.hpp"
 
 #include "webview.hpp"

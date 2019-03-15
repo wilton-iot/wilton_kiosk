@@ -33,8 +33,8 @@
 #include "staticlib/utils.hpp"
 
 #include "wilton/support/exception.hpp"
-#include "wilton/support/handle_registry.hpp"
 #include "wilton/support/logging.hpp"
+#include "wilton/support/misc.hpp"
 
 #include "webview_config.hpp"
 
