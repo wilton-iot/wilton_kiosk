@@ -77,11 +77,11 @@ public:
         }
 
         // wiltoncall support
-        if (conf.enable_wiltoncalls) {
+        if (conf.enable_wilton_calls) {
             g_signal_connect(webkit_web_view_get_user_content_manager(web_view),
-                    "script-message-received::wiltoncall", G_CALLBACK(wiltoncall_callback), this);
+                    "script-message-received::wilton", G_CALLBACK(runscript_callback), this);
             webkit_user_content_manager_register_script_message_handler(
-                    webkit_web_view_get_user_content_manager(web_view), "wiltoncall");
+                    webkit_web_view_get_user_content_manager(web_view), "wilton");
         }
 
         // disable context menu
@@ -146,16 +146,16 @@ private:
         return TRUE;
     }
 
-    // window.webkit.messageHandlers.wiltoncall.postMessage(JSON.stringify({...}));
-    static void wiltoncall_callback(WebKitUserContentManager*, WebKitJavascriptResult* result, gpointer) {
+    // window.webkit.messageHandlers.wilton.postMessage(JSON.stringify({...}));
+    static void runscript_callback(WebKitUserContentManager*, WebKitJavascriptResult* result, gpointer) {
         auto value = webkit_javascript_result_get_js_value(result);
         if (!jsc_value_is_string(value)) {
-            std::cout << "[wiltoncall] ERROR: Invalid non-string JS value specified" << std::endl;
+            std::cout << "[wilton] ERROR: Invalid non-string JS value specified" << std::endl;
             return;
         }
         auto cstr = jsc_value_to_string(value);
         if (nullptr == cstr) {
-            std::cout << "[wiltoncall] ERROR: Cannot access specified JS value as UTF-8 string" << std::endl;
+            std::cout << "[wilton] ERROR: Cannot access specified JS value as UTF-8 string" << std::endl;
             return;
         }
         auto deferred = sl::support::defer([cstr] () STATICLIB_NOEXCEPT {
@@ -173,14 +173,14 @@ private:
                     wilton_free(out);
                 });
                 auto outst = std::string(out, out_len);
-                std::cout << "[wiltoncall] INFO: Call output: [" << outst << "]" << std::endl;
+                std::cout << "[wilton] INFO: Call output: [" << outst << "]" << std::endl;
             }
         } else {
             auto err_deferred = sl::support::defer([err]() STATICLIB_NOEXCEPT {
                 wilton_free(err);
             });
             auto errst = std::string(err);
-            std::cout << "[wiltoncall] ERROR: " << errst << std::endl;
+            std::cout << "[wilton] ERROR: " << errst << std::endl;
         }
     }
 
