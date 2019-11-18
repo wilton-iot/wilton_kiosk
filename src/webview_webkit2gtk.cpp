@@ -32,6 +32,7 @@
 #include "staticlib/pimpl/forward_macros.hpp"
 #include "staticlib/utils.hpp"
 
+#include "wilton/wiltoncall.h"
 #include "wilton/support/exception.hpp"
 
 #include "webview_config.hpp"
@@ -73,6 +74,14 @@ public:
         g_signal_connect(window, "key_release_event", G_CALLBACK(on_key_release_callback), this);
         if (conf.console_to_stdout) {
             webkit_settings_set_enable_write_console_messages_to_stdout(webkit_web_view_get_settings(web_view), TRUE);
+        }
+
+        // wiltoncall support
+        if (conf.enable_wiltoncalls) {
+            g_signal_connect(webkit_web_view_get_user_content_manager(web_view),
+                    "script-message-received::wiltoncall", G_CALLBACK(wiltoncall_callback), this);
+            webkit_user_content_manager_register_script_message_handler(
+                    webkit_web_view_get_user_content_manager(web_view), "wiltoncall");
         }
 
         // disable context menu
@@ -135,6 +144,44 @@ private:
         auto ptr = reinterpret_cast<webview::impl*>(instance);
         ptr->on_key_release(event->keyval);
         return TRUE;
+    }
+
+    // window.webkit.messageHandlers.wiltoncall.postMessage(JSON.stringify({...}));
+    static void wiltoncall_callback(WebKitUserContentManager*, WebKitJavascriptResult* result, gpointer) {
+        auto value = webkit_javascript_result_get_js_value(result);
+        if (!jsc_value_is_string(value)) {
+            std::cout << "[wiltoncall] ERROR: Invalid non-string JS value specified" << std::endl;
+            return;
+        }
+        auto cstr = jsc_value_to_string(value);
+        if (nullptr == cstr) {
+            std::cout << "[wiltoncall] ERROR: Cannot access specified JS value as UTF-8 string" << std::endl;
+            return;
+        }
+        auto deferred = sl::support::defer([cstr] () STATICLIB_NOEXCEPT {
+            g_free(cstr);
+        });
+        auto input = std::string(cstr);
+        char* out = nullptr;
+        int out_len = 0;
+        auto err = wiltoncall_runscript("", 0, // default engine
+                input.c_str(), static_cast<int> (input.length()),
+                std::addressof(out), std::addressof(out_len));
+        if (nullptr == err) {
+            if (nullptr != out) {
+                auto out_deferred = sl::support::defer([out]() STATICLIB_NOEXCEPT {
+                    wilton_free(out);
+                });
+                auto outst = std::string(out, out_len);
+                std::cout << "[wiltoncall] INFO: Call output: [" << outst << "]" << std::endl;
+            }
+        } else {
+            auto err_deferred = sl::support::defer([err]() STATICLIB_NOEXCEPT {
+                wilton_free(err);
+            });
+            auto errst = std::string(err);
+            std::cout << "[wiltoncall] ERROR: " << errst << std::endl;
+        }
     }
 
 };

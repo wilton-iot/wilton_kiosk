@@ -47,6 +47,7 @@ public:
     uint16_t window_height = 480;
     bool console_to_stdout = false;
     bool inspector_mode = false;
+    bool enable_wiltoncalls = false;
 
     webview_config(const webview_config&) = delete;
 
@@ -60,7 +61,8 @@ public:
     window_width(other.window_width),
     window_height(other.window_height),
     console_to_stdout(other.console_to_stdout),
-    inspector_mode(other.inspector_mode) { }
+    inspector_mode(other.inspector_mode),
+    enable_wiltoncalls(other.enable_wiltoncalls) { }
 
     webview_config& operator=(webview_config&& other) {
         url = std::move(other.url);
@@ -71,6 +73,7 @@ public:
         window_height = other.window_height;
         console_to_stdout = other.console_to_stdout;
         inspector_mode = other.inspector_mode;
+        enable_wiltoncalls = other.enable_wiltoncalls;
         return *this;
     }
 
@@ -95,6 +98,8 @@ public:
                 this->console_to_stdout = fi.as_bool_or_throw(name);
             }  else if("inspectorMode" == name) {
                 this->inspector_mode = fi.as_bool_or_throw(name);
+            }  else if("enableWiltonCalls" == name) {
+                this->enable_wiltoncalls = fi.as_bool_or_throw(name);
             } else {
                 throw support::exception(TRACEMSG("Unknown 'webview_config' field: [" + name + "]"));
             }
@@ -112,7 +117,8 @@ public:
             { "windowHeight", window_height },
             { "windowWidth", window_width },
             { "consoleToStdout", console_to_stdout },
-            { "inspectorMode", inspector_mode}
+            { "inspectorMode", inspector_mode},
+            { "enableWiltonCalls", enable_wiltoncalls}
         };
     }
 };
