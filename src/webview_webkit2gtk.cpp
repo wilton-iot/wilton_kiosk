@@ -26,6 +26,7 @@
 
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
+#include <JavaScriptCore/JavaScript.h>
 #include <webkit2/webkit2.h>
 
 #include "staticlib/support.hpp"
@@ -148,20 +149,29 @@ private:
 
     // window.webkit.messageHandlers.wilton.postMessage(JSON.stringify({...}));
     static void runscript_callback(WebKitUserContentManager*, WebKitJavascriptResult* result, gpointer) {
-        auto value = webkit_javascript_result_get_js_value(result);
-        if (!jsc_value_is_string(value)) {
+        // re-implementing 'webkit_javascript_result_get_js_value'
+        // that is not available on xenial
+        auto ctx = webkit_javascript_result_get_global_context(result);
+        auto val = webkit_javascript_result_get_value(result);
+        auto jstr = JSValueToStringCopy(ctx, val, nullptr);
+        if (nullptr == jstr) {
             std::cout << "[wilton] ERROR: Invalid non-string JS value specified" << std::endl;
             return;
         }
-        auto cstr = jsc_value_to_string(value);
-        if (nullptr == cstr) {
-            std::cout << "[wilton] ERROR: Cannot access specified JS value as UTF-8 string" << std::endl;
+        auto deferred = sl::support::defer([jstr]() STATICLIB_NOEXCEPT {
+            JSStringRelease(jstr);
+        });
+        size_t maxlen = JSStringGetMaximumUTF8CStringSize(jstr);
+        auto input = std::string();
+        input.resize(maxlen);
+        size_t len = JSStringGetUTF8CString(jstr, std::addressof(input.front()), input.length());
+        if (len <= 0) {
+            std::cout << "[wilton] ERROR: Invalid empty string specified" << std::endl;
             return;
         }
-        auto deferred = sl::support::defer([cstr] () STATICLIB_NOEXCEPT {
-            g_free(cstr);
-        });
-        auto input = std::string(cstr);
+        input.resize(len - 1);
+        
+        // call wilton
         char* out = nullptr;
         int out_len = 0;
         auto err = wiltoncall_runscript("", 0, // default engine

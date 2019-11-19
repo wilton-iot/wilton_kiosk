@@ -64,6 +64,11 @@ target_include_directories ( ${PROJECT_NAME} BEFORE PRIVATE
 
 target_compile_options ( ${PROJECT_NAME} PRIVATE ${${PROJECT_NAME}_DEPS_PC_CFLAGS_OTHER} )
 
+# linux webkit2gtk pre-JSC API usage
+if ( STATICLIB_TOOLCHAIN MATCHES "linux_.+" )
+    target_compile_options ( ${PROJECT_NAME} PRIVATE -Wno-deprecated-declarations )
+endif ( )
+
 # debuginfo
 staticlib_extract_debuginfo_shared ( ${PROJECT_NAME} )
 
