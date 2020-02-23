@@ -48,6 +48,8 @@ public:
     bool console_to_stdout = false;
     bool inspector_mode = false;
     bool enable_wilton_calls = false;
+    std::string title;
+    std::string icon_path;
 
     webview_config(const webview_config&) = delete;
 
@@ -62,7 +64,9 @@ public:
     window_height(other.window_height),
     console_to_stdout(other.console_to_stdout),
     inspector_mode(other.inspector_mode),
-    enable_wilton_calls(other.enable_wilton_calls) { }
+    enable_wilton_calls(other.enable_wilton_calls),
+    title(std::move(other.title)),
+    icon_path(std::move(other.icon_path)) { }
 
     webview_config& operator=(webview_config&& other) {
         url = std::move(other.url);
@@ -74,6 +78,8 @@ public:
         console_to_stdout = other.console_to_stdout;
         inspector_mode = other.inspector_mode;
         enable_wilton_calls = other.enable_wilton_calls;
+        title = std::move(other.title);
+        icon_path = std::move(other.icon_path);
         return *this;
     }
 
@@ -100,6 +106,10 @@ public:
                 this->inspector_mode = fi.as_bool_or_throw(name);
             }  else if("enableWiltonCalls" == name) {
                 this->enable_wilton_calls = fi.as_bool_or_throw(name);
+            }  else if("title" == name) {
+                this->title = fi.as_string_nonempty_or_throw(name);
+            }  else if("iconPath" == name) {
+                this->icon_path = fi.as_string_nonempty_or_throw(name);
             } else {
                 throw support::exception(TRACEMSG("Unknown 'webview_config' field: [" + name + "]"));
             }
@@ -117,8 +127,10 @@ public:
             { "windowHeight", window_height },
             { "windowWidth", window_width },
             { "consoleToStdout", console_to_stdout },
-            { "inspectorMode", inspector_mode},
-            { "enableWiltonCalls", enable_wilton_calls}
+            { "inspectorMode", inspector_mode },
+            { "enableWiltonCalls", enable_wilton_calls },
+            { "title", title },
+            { "iconPath", icon_path }
         };
     }
 };

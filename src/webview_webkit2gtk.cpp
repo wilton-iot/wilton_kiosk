@@ -69,6 +69,9 @@ public:
         gtk_window_set_resizable(GTK_WINDOW(window), TRUE);
         gtk_window_resize(GTK_WINDOW(window), conf.window_width, conf.window_height);
         gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
+        if (!conf.title.empty()) {
+            gtk_window_set_title(GTK_WINDOW(window), conf.title.c_str());
+        }
 
         // signals and settings
         g_signal_connect(window, "destroy", G_CALLBACK(destroy_callback), this);
