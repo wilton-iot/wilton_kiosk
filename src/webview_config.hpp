@@ -106,10 +106,12 @@ public:
                 this->inspector_mode = fi.as_bool_or_throw(name);
             }  else if("enableWiltonCalls" == name) {
                 this->enable_wilton_calls = fi.as_bool_or_throw(name);
-            }  else if("title" == name) {
+            }  else if("windowTitle" == name) {
                 this->title = fi.as_string_nonempty_or_throw(name);
-            }  else if("iconPath" == name) {
+            }  else if("windowIconPath" == name) {
                 this->icon_path = fi.as_string_nonempty_or_throw(name);
+            }  else if("fxStageCallback" == name) {
+                // ignore on linux
             } else {
                 throw support::exception(TRACEMSG("Unknown 'webview_config' field: [" + name + "]"));
             }
@@ -129,8 +131,8 @@ public:
             { "consoleToStdout", console_to_stdout },
             { "inspectorMode", inspector_mode },
             { "enableWiltonCalls", enable_wilton_calls },
-            { "title", title },
-            { "iconPath", icon_path }
+            { "windowTitle", title },
+            { "windowIconPath", icon_path }
         };
     }
 };
